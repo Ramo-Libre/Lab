@@ -1,0 +1,8 @@
+name = "ramolibrelab"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "build"
+
+[[kv_namespaces]]
+binding = "LAB_KV"
+id = "f2f5863c15c84287bf3221a857f5f3b1"
+preview_id = "404143a88e464c519370c47aa65f7827"
