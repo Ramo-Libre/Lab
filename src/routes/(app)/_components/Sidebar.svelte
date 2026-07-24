@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { SuiteFavicons } from '@ramo-libre/ui-themes';
 	import { VERSION } from '$lib/utils/version';
-	import { decodeUrlData, encodeUrlData } from '$lib/utils/url_data';
-	import type { Simulacion } from '$lib/state/simulaciones.svelte';
+	import { shareLab, hydrateFromUrl } from '$lib/share';
 	import { db } from '$lib/state/index.svelte';
 	import { onMount } from 'svelte';
 	import { Link2, FolderOpen, Settings, Check } from '@lucide/svelte'; // Importamos Check
@@ -18,29 +17,16 @@
 	// Runa para controlar la microinteracción de copiado
 	let copied = $state(false);
 
-	onMount(() => {
-		const url = new URL(window.location.href);
-		const payload = url.searchParams.get('share');
-		if (!payload) return;
-		try {
-			const shared = decodeUrlData<Simulacion>(payload);
-			if (shared && shared.id) {
-				db.simulaciones.loadActual(shared);
-			}
-		} catch (error) {
-			console.warn('Sidebar: invalid share payload', error);
-		}
+	onMount(async () => {
+		const lab = await hydrateFromUrl();
+		if (lab) db.simulaciones.loadActual(lab);
 	});
 
-	function handleShareLink() {
-		// Si ya está en estado animado, evitamos clicks redundantes
+	async function handleShareLink() {
 		if (copied) return;
 
-		const url = new URL(window.location.href);
-		const payload = encodeUrlData(db.simulaciones.actual);
-		url.searchParams.set('share', payload);
-
-		navigator.clipboard.writeText(url.toString()).then(() => {
+		const url = await shareLab(db.simulaciones.actual);
+		navigator.clipboard.writeText(url).then(() => {
 			copied = true;
 
 			// Retornar al estado original tras 2 segundos
